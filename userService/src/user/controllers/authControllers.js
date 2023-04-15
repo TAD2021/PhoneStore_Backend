@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 
 let refreshTokens = [];
 
@@ -11,24 +12,27 @@ const authController = {
       const salt = await bcrypt.genSalt(10);
       const hashed = await bcrypt.hash(req.body.password, salt);
 
-      const oldUser = await User.find({username: req.body.username})
+      const user = await User.findOne({ username: req.body.username });
 
-      if (oldUser.length > 0) {
-        return res.status(208).json({ message: "User already exists, please change the username", oldUser });
+      if (user) {
+        return res.status(409).json({
+          message: "Username already exists, please choose another one",
+        });
       }
 
       //Create new user
-      const newUser = await new User({
+      const newUser = new User({
         username: req.body.username,
         email: req.body.email,
         password: hashed,
       });
 
       //Save user to DB
-      const user = await newUser.save();
-      res.status(200).json(user);
+      const savedUser = await newUser.save();
+      return res.status(200).json(savedUser);
     } catch (err) {
-      res.status(500).json({ message: "Register user not found" });
+      console.log("Error registering user:", err);
+      return res.status(500).json({ message: "Register user not found" });
     }
   },
 
@@ -39,7 +43,7 @@ const authController = {
         admin: user.admin,
       },
       process.env.JWT_ACCESS_KEY,
-      { expiresIn: "1s" }
+      { expiresIn: "10s" }
     );
   },
 
@@ -148,7 +152,7 @@ const authController = {
     res.clearCookie("refreshToken");
     return res.status(200).json("Logged out successfully!");
   },
-  changePassword: async(req, res) => {
+  changePassword: async (req, res) => {
     try {
       const user = await User.findOne({ _id: req.params.id });
       if (!user) {
@@ -169,11 +173,129 @@ const authController = {
 
       user.save();
 
-      res.status(200).json({ message: "Change password successfully" })
+      res.status(200).json({ message: "Change password successfully" });
     } catch (err) {
       res.status(500).json({ message: "User not found" });
     }
-  }
+  },
+
+  forgotPassword: async (req, res) => {
+    try {
+      const { email } = req.body;
+
+      const user = await User.findOne({ email });
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const token = jwt.sign(
+        {
+          id: user.id,
+        },
+        process.env.RESET_PASSWORD_KEY,
+        { expiresIn: "300m" }
+      );
+      user.resetLink = token;
+      await user.save();
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL_ADDRESS,
+          pass: process.env.EMAIL_PASSWORD,
+        },
+      });
+      const resetPasswordUrl = `http://localhost:8000/auth/reset-password${token}`;
+
+      const mailOptions = {
+        from: process.env.EMAIL_ADDRESS,
+        to: user.email,
+        subject: "Đặt lại mật khẩu",
+        html: `
+          <div style="background-color: #f2f2f2; padding: 20px;">
+            <h2 style="color: #007bff;">Xin chào ${user.name}!</h2>
+            <p>Bạn đã yêu cầu đặt lại mật khẩu của tài khoản của mình.</p>
+            <p>Vui lòng sử dụng liên kết sau để đặt lại mật khẩu:</p>
+            <div style="padding: 10px; background-color: white; text-align: center;">
+              <a href="${resetPasswordUrl}" style="display: inline-block; background-color: #007bff; color: white; padding: 10px; text-decoration: none;">Đặt lại mật khẩu</a>
+            </div>
+            <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>
+            <p>Trân trọng,</p>
+            <p>Đội ngũ quản trị viên</p>
+          </div>
+        `,
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.log(error);
+          return res.status(500).json({ message: "Send email not found" });
+        } else {
+          return res
+            .status(200)
+            .json({ message: "Password reset email has been sent" });
+        }
+      });
+    } catch (error) {
+      console.log("Email sent: ", error);
+      res.status(500).json({ message: "Forgot Password not found" });
+    }
+  },
+
+  resetPassword: async (req, res) => {
+    const { newPassword, token } = req.body;
+    try {
+      const payload = jwt.verify(token, process.env.RESET_PASSWORD_KEY);
+
+      const user = await User.findOne({ _id: payload.id });
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      if (user.resetLink !== token) {
+        return res.status(400).json({ error: "Invalid or expired token" });
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+      user.password = hashedPassword;
+      user.resetLink = null;
+      await user.save();
+
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL_ADDRESS,
+          pass: process.env.EMAIL_PASSWORD,
+        },
+      });
+
+      const mailOptions = {
+        from: process.env.EMAIL_ADDRESS,
+        to: user.email,
+        subject: "Mật khẩu của bạn đã được thay đổi",
+        html: `
+          <div style="font-family: Arial, Helvetica, sans-serif; font-size: 16px;">
+            <h2>Xin chào ${user.name}!</h2>
+            <p>Chúc mừng bạn! Mật khẩu của tài khoản của bạn đã được thay đổi thành công.</p>
+            <p>Nếu bạn không thực hiện hành động này, vui lòng liên hệ với chúng tôi ngay lập tức để được hỗ trợ.</p>
+            <p>Trân trọng,</p>
+            <p>Đội ngũ quản trị viên</p>
+          </div>
+        `,
+      };
+
+      transporter.sendMail(mailOptions, (err) => {
+        if (err) {
+          return res.status(400).json({ error: err.message });
+        }
+        return res.json({ message: "Password has been successfully changed" });
+      });
+    } catch (err) {
+      return res.status(500).json({ message: "Reset password not found" });
+    }
+  },
 };
 
 module.exports = authController;
