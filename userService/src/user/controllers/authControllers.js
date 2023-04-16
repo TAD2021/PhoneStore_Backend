@@ -12,26 +12,28 @@ const authController = {
       const salt = await bcrypt.genSalt(10);
       const hashed = await bcrypt.hash(req.body.password, salt);
 
-      const user = await User.findOne({ username: req.body.username });
+      const user = await User.findOne({ email: req.body.email });
 
       if (user) {
         return res.status(409).json({
-          message: "Username already exists, please choose another one",
+          message: "Email already exists, please choose another one",
         });
       }
 
       //Create new user
       const newUser = new User({
-        username: req.body.username,
         email: req.body.email,
         password: hashed,
+        name: req.body.name,
+        address: req.body.address,
+        specificAddress: req.body.specificAddress,
+        phone: req.body.phone,
       });
 
       //Save user to DB
       const savedUser = await newUser.save();
       return res.status(200).json(savedUser);
     } catch (err) {
-      console.log("Error registering user:", err);
       return res.status(500).json({ message: "Register user not found" });
     }
   },
@@ -61,9 +63,9 @@ const authController = {
   //LOGIN
   loginUser: async (req, res) => {
     try {
-      const user = await User.findOne({ username: req.body.username });
+      const user = await User.findOne({ email: req.body.email });
       if (!user) {
-        return res.status(404).json("Incorrect username");
+        return res.status(404).json("Incorrect email");
       }
       const validPassword = await bcrypt.compare(
         req.body.password,
@@ -194,7 +196,7 @@ const authController = {
           id: user.id,
         },
         process.env.RESET_PASSWORD_KEY,
-        { expiresIn: "300m" }
+        { expiresIn: "30m" }
       );
       user.resetLink = token;
       await user.save();
