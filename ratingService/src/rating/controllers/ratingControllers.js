@@ -67,6 +67,17 @@ const ratingController = {
     } catch (error) {
       res.status(500).json({ message: "Get rating not found", error });
     }
+  },
+  getAllRating: async (req, res) => {
+    try {
+      const rating = await Rating.find();
+      if (rating.length === 0) {
+        return res.status(404).json({ message: "No rating found" });
+      }
+      return res.status(200).json({ message: " Get all rating successfully", rating });
+    } catch (error) {
+      res.status(500).json({ message: "Error occurred", error });
+    }
   }
 };
 

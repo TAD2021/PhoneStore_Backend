@@ -1654,6 +1654,7 @@ node-fetch@^2.6.7:
   dependencies:
     whatwg-url "^5.0.0"
 
+<<<<<<< HEAD
 nodemailer@^6.9.1:
   version "6.9.1"
   resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-6.9.1.tgz#8249d928a43ed85fec17b13d2870c8f758a126ed"
@@ -1663,6 +1664,17 @@ nodemon@^2.0.20:
   version "2.0.20"
   resolved "https://registry.npmjs.org/nodemon/-/nodemon-2.0.20.tgz"
   integrity sha512-Km2mWHKKY5GzRg6i1j5OxOHQtuvVsgskLfigG25yTtbyfRGn/GNvIbRyOf1PSCKJ2aT/58TiuUsuOU5UToVViw==
+=======
+"nodemailer@^6.9.1":
+  "integrity" "sha512-qHw7dOiU5UKNnQpXktdgQ1d3OFgRAekuvbJLcdG5dnEo/GtcTHRYM7+UfJARdOFU9WUQO8OiIamgWPmiSFHYAA=="
+  "resolved" "https://registry.npmjs.org/nodemailer/-/nodemailer-6.9.1.tgz"
+  "version" "6.9.1"
+
+"nodemon@^2.0.20":
+  "integrity" "sha512-Km2mWHKKY5GzRg6i1j5OxOHQtuvVsgskLfigG25yTtbyfRGn/GNvIbRyOf1PSCKJ2aT/58TiuUsuOU5UToVViw=="
+  "resolved" "https://registry.npmjs.org/nodemon/-/nodemon-2.0.20.tgz"
+  "version" "2.0.20"
+>>>>>>> ce9b654 (update backend)
   dependencies:
     chokidar "^3.5.2"
     debug "^3.2.7"
