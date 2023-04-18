@@ -13,10 +13,6 @@ const authController = {
       const hashed = await bcrypt.hash(req.body.password, salt);
 
       const user = await User.findOne({ email: req.body.email });
-<<<<<<< HEAD
-
-=======
->>>>>>> ce9b654 (update backend)
       if (user) {
         return res.status(409).json({
           message: "Email already exists, please choose another one",
@@ -28,25 +24,16 @@ const authController = {
         email: req.body.email,
         password: hashed,
         name: req.body.name,
-<<<<<<< HEAD
-        address: req.body.address,
-        specificAddress: req.body.specificAddress,
-        phone: req.body.phone,
-=======
         address: '',
         specificAddress: '',
         phone: '',
->>>>>>> ce9b654 (update backend)
       });
 
       //Save user to DB
       const savedUser = await newUser.save();
       return res.status(200).json(savedUser);
     } catch (err) {
-<<<<<<< HEAD
-=======
       console.log("Error registering user:", err);
->>>>>>> ce9b654 (update backend)
       return res.status(500).json({ message: "Register user not found" });
     }
   },
@@ -167,7 +154,7 @@ const authController = {
     res.clearCookie("refreshToken");
     return res.status(200).json("Logged out successfully!");
   },
-  changePassword: async (req, res) => {
+  changePassword: async(req, res) => {
     try {
       const user = await User.findOne({ _id: req.params.id });
       if (!user) {
@@ -188,15 +175,11 @@ const authController = {
 
       user.save();
 
-      res.status(200).json({ message: "Change password successfully" });
+      res.status(200).json({ message: "Change password successfully" })
     } catch (err) {
       res.status(500).json({ message: "User not found" });
     }
   },
-<<<<<<< HEAD
-
-=======
->>>>>>> ce9b654 (update backend)
   forgotPassword: async (req, res) => {
     try {
       const { email } = req.body;
@@ -223,11 +206,7 @@ const authController = {
           pass: process.env.EMAIL_PASSWORD,
         },
       });
-<<<<<<< HEAD
-      const resetPasswordUrl = `http://localhost:8000/auth/reset-password${token}`;
-=======
       const resetPasswordUrl = `http://localhost:3000/users/resetpassword/${token}`;
->>>>>>> ce9b654 (update backend)
 
       const mailOptions = {
         from: process.env.EMAIL_ADDRESS,
@@ -269,11 +248,8 @@ const authController = {
     try {
       const payload = jwt.verify(token, process.env.RESET_PASSWORD_KEY);
 
-<<<<<<< HEAD
-=======
       console.log(payload)
 
->>>>>>> ce9b654 (update backend)
       const user = await User.findOne({ _id: payload.id });
       if (!user) {
         return res.status(404).json({ error: "User not found" });

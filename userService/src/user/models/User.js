@@ -31,12 +31,7 @@ const userSchema = new mongoose.Schema({
     resetLink: {
         type: Object,
         default: {}
-<<<<<<< HEAD
-      }
-
-=======
     }
->>>>>>> ce9b654 (update backend)
 }, { timestamps: true }
 );
 
