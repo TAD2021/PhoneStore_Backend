@@ -26,7 +26,7 @@ app.use(cors({credentials: true, origin: process.env.FRONTEND_URL}));
 app.use(morgan("common"));
 
 ///ROUTES
-app.use("/rating", ratingRouter);
+app.use("/", ratingRouter);
 app.listen(7000, () => {
   console.log("Server userService is running...");
 });

@@ -6,4 +6,6 @@ router.post("/", ratingController.createRating);
 router.get("/", ratingController.getAllRating);
 router.get("/:id", ratingController.getRatingByProduct);
 
+
+
 module.exports = router;

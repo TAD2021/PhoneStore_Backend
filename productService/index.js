@@ -21,11 +21,11 @@ mongoose
 const app = express();
 app.use(express.json());
 app.use(bodyParser.json({ limit: "50mb" }));
-app.use(cors());
+app.use(cors({credentials: true, origin: 'http://localhost:3000'}));
 app.use(morgan("common"));
 
 ///ROUTES
-app.use("/product", productRouter);
+app.use("/", productRouter);
 
 app.listen(4000, () => {
   console.log("Server productService is running...");

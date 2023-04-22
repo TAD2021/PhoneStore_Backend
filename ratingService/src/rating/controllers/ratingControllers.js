@@ -15,13 +15,13 @@ const ratingController = {
         return res.status(400).json({ message: "User and products are required" });
       }
 
-      const userResponse = await axios.get(`http://localhost:8000/user/${userId}`);
+      const userResponse = await axios.get(`${process.env.BASE_SERVICE_URL}/user/${userId}`);
       if (userResponse.status !== 200) {
         return res.status(userResponse.status).json({ message: "Failed to get user data", error: userResponse.data });
       }
       const userData = userResponse.data;
 
-      const productResponse = await axios.get(`http://localhost:4000/product/${productId}`);
+      const productResponse = await axios.get(`${process.env.BASE_SERVICE_URL}/product/${productId}`);
       if (productResponse.status !== 200) {
         return res.status(productResponse.status).json({ message: "Failed to get product data", error: productResponse.data });
       }

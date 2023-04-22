@@ -6,29 +6,33 @@ const orderController = {
     try {
       const { user, products, name, phone, address } = req.body;
   
-      if (!user || !products) {
-        return res.status(400).json({ message: "User and products are required" });
+      if (!products) {
+        return res.status(400).json({ message: "Products are required" });
       }
 
-      const userResponse = await axios.get(`http://localhost:8000/user/${user}`);
-      if (userResponse.status !== 200) {
-        return res.status(userResponse.status).json({ message: "Failed to get user data", error: userResponse.data });
+      let userData ={};
+
+      if(user){
+        const userResponse = await axios.get(`${process.env.BASE_SERVICE_URL}/user/${user}`);
+  
+        if (userResponse.status !== 200) {
+          return res.status(userResponse.status).json({ message: "Failed to get user data", error: userResponse.data });
+        }
+        userData = userResponse.data;
       }
-      const userData = userResponse.data;
+      console.log(userData)
 
       const productsData = []
       for (const product of products) {
-        const productResponse = await axios.get(`http://localhost:4000/product/${product.id}`);
+        const productResponse = await axios.get(`${process.env.BASE_SERVICE_URL}/product/${product.id}`);
         if (productResponse.status !== 200) {
           return res.status(productResponse.status).json({ message: "Failed to get product data", error: productResponse.data });
         }
         productResponse.data !==null && product.quantity <= productResponse.data.quantity && productsData.push({...productResponse.data, quantityInOrder: product.quantity})
       }
 
-      console.log("productsData", productsData);
-
       const order = new Order({
-        userId: userData._id,
+        userId: userData?._id,
         products: productsData.map((productData)=>({
           id: productData._id,
           name: productData.nameProduct,
@@ -40,7 +44,7 @@ const orderController = {
         name: name,
         phone: phone,
         address: address,
-        status: "Chờ xác nhận"
+        status: "CHỜ XÁC NHẬN"
       });
       console.log("order", order);
 
@@ -77,6 +81,28 @@ const orderController = {
   },
   updateOrder: async (req, res) => {
     try {
+      const { products, status } = req.body;
+      const productsData = []
+      for (const product of products) {
+        const productResponse = await axios.get(`${process.env.BASE_SERVICE_URL}/product/${product.id}`);
+        if (productResponse.status !== 200) {
+          return res.status(productResponse.status).json({ message: "Failed to get product data", error: productResponse.data });
+        }
+        productResponse.data !==null && product.quantity <= productResponse.data.quantity && productsData.push({...productResponse.data, quantityInOrder: parseInt(product.quantity)})
+      }
+
+      console.log(productsData)
+
+      if(status === 'ĐÃ HỦY' || status === 'TRẢ HÀNG/HOÀN TIỀN'){
+        for (const product of productsData) {
+          await axios.put(`${process.env.BASE_SERVICE_URL}/product/${product._id}`, {quantity: product.quantity + product.quantityInOrder});
+        }
+      }else if(status === 'ĐÃ XÁC NHẬN'){
+        for (const product of productsData) {
+          await axios.put(`${process.env.BASE_SERVICE_URL}/product/${product._id}`, {quantity: product.quantity - product.quantityInOrder});
+        }
+      }
+
       const order = await Order.findByIdAndUpdate(req.params.id, req.body, {
         new: true,
       });
