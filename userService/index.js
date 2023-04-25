@@ -29,6 +29,6 @@ app.use(morgan("common"));
 ///ROUTES
 app.use("/auth", authRouter);
 app.use("/", userRouter);
-app.listen(8001, () => {
+app.listen(8000, () => {
   console.log("Server userService is running...");
 });

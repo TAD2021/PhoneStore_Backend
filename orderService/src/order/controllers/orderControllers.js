@@ -13,7 +13,7 @@ const orderController = {
       let userData ={};
 
       if(user){
-        const userResponse = await axios.get(`${process.env.USER_SERVICE_URL}/${user}`,{withCredentials: true});
+        const userResponse = await axios.get(`${process.env.USER_SERVICE_URL}/${user}`);
   
         if (userResponse.status !== 200) {
           return res.status(userResponse.status).json({ message: "Failed to get user data", error: userResponse.data });
@@ -24,7 +24,7 @@ const orderController = {
 
       const productsData = []
       for (const product of products) {
-        const productResponse = await axios.get(`${process.env.PRODUCT_SERVICE_URL}/${product.id}`,{withCredentials: true});
+        const productResponse = await axios.get(`${process.env.PRODUCT_SERVICE_URL}/${product.id}`);
         if (productResponse.status !== 200) {
           return res.status(productResponse.status).json({ message: "Failed to get product data", error: productResponse.data });
         }
@@ -84,7 +84,7 @@ const orderController = {
       const { products, status } = req.body;
       const productsData = []
       for (const product of products) {
-        const productResponse = await axios.get(`${process.env.BASE_SERVICE_URL}/product/${product.id}`);
+        const productResponse = await axios.get(`${process.env.PRODUCT_SERVICE_URL}/${product.id}`);
         if (productResponse.status !== 200) {
           return res.status(productResponse.status).json({ message: "Failed to get product data", error: productResponse.data });
         }
@@ -95,11 +95,11 @@ const orderController = {
 
       if(status === 'ĐÃ HỦY' || status === 'TRẢ HÀNG/HOÀN TIỀN'){
         for (const product of productsData) {
-          await axios.put(`${process.env.BASE_SERVICE_URL}/product/${product._id}`, {quantity: product.quantity + product.quantityInOrder});
+          await axios.put(`${process.env.PRODUCT_SERVICE_URL}/${product._id}`, {quantity: product.quantity + product.quantityInOrder});
         }
       }else if(status === 'ĐÃ XÁC NHẬN'){
         for (const product of productsData) {
-          await axios.put(`${process.env.BASE_SERVICE_URL}/product/${product._id}`, {quantity: product.quantity - product.quantityInOrder});
+          await axios.put(`${process.env.PRODUCT_SERVICE_URL}/${product._id}`, {quantity: product.quantity - product.quantityInOrder});
         }
       }
 

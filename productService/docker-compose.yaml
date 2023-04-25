@@ -1,24 +1,13 @@
 version: "3"
 
 services:
-  product:
+  app:
     build: .
     command: npm start
     ports:
       - "4000:4000"
     volumes:
-      - .:/product
-    depends_on:
-      - "mongo"
-    networks:
-      - backend
-  order:
-    build: .
-    command: npm start
-    ports:
-      - "5000:5000"
-    volumes:
-      - .:/order
+      - .:/app
     depends_on:
       - "mongo"
     networks:
