@@ -13,7 +13,7 @@ const orderController = {
       let userData ={};
 
       if(user){
-        const userResponse = await axios.get(`${process.env.BASE_SERVICE_URL}/user/${user}`);
+        const userResponse = await axios.get(`${process.env.USER_SERVICE_URL}/${user}`,{withCredentials: true});
   
         if (userResponse.status !== 200) {
           return res.status(userResponse.status).json({ message: "Failed to get user data", error: userResponse.data });
@@ -24,7 +24,7 @@ const orderController = {
 
       const productsData = []
       for (const product of products) {
-        const productResponse = await axios.get(`${process.env.BASE_SERVICE_URL}/product/${product.id}`);
+        const productResponse = await axios.get(`${process.env.PRODUCT_SERVICE_URL}/${product.id}`,{withCredentials: true});
         if (productResponse.status !== 200) {
           return res.status(productResponse.status).json({ message: "Failed to get product data", error: productResponse.data });
         }

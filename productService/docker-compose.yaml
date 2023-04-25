@@ -1,24 +1,35 @@
 version: "3"
 
 services:
-  app:
+  product:
     build: .
     command: npm start
     ports:
       - "4000:4000"
     volumes:
-      - .:/app
+      - .:/product
+    depends_on:
+      - "mongo"
+    networks:
+      - backend
+  order:
+    build: .
+    command: npm start
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/order
     depends_on:
       - "mongo"
     networks:
       - backend
 
   mongo:
-    container_name: "mongo-node"
+    container_name: "mongo-product"
     platform: linux/amd64
     image: mongo:4.4.14
     ports:
-      - "8081:8081"
+      - "8080:8080"
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: root
       ME_CONFIG_MONGODB_ADMINPASSWORD: root
