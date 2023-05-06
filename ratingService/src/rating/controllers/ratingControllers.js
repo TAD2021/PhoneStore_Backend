@@ -8,7 +8,7 @@ const ratingController = {
 
       const oldRating = await Rating.find({userId, productId});
       if (oldRating.length > 0) {
-        return res.status(208).json({ message: "User has rating this product", oldRating });
+        return res.status(409).json({ message: "User has rating this product", oldRating });
       }
 
       if (!userId || !productId) {
@@ -31,11 +31,11 @@ const ratingController = {
       const date = today.getDate() +  '/' + (today.getMonth()+1) + '/' + today.getFullYear();
       let time;
       if(today.getHours() < 10 && today.getMinutes() < 10){
-        time = "0" + today.getHours() + ": 0" + today.getMinutes();
+        time = "0" + today.getHours() + ":0" + today.getMinutes();
       }else if(today.getHours() < 10){
         time = "0" + today.getHours() + ":" + today.getMinutes();
       }else if(today.getMinutes() < 10){
-        time = today.getHours() + ": 0" + today.getMinutes();
+        time = today.getHours() + ":0" + today.getMinutes();
       }else{
         time = today.getHours() + ":" + today.getMinutes();
       }
